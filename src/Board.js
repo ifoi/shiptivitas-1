@@ -52,8 +52,10 @@ export default class Board extends React.Component {
   }
   renderSwimlane(name, clients, ref) {
     return (
-      <Swimlane name={name} clients={clients} dragulaRef={ref}/>
-    );
+      <Swimlane name={name} clients={clients} dragulaRef={ref}/> 
+    )  
+  
+
   }
 
   render() {
@@ -61,7 +63,7 @@ export default class Board extends React.Component {
       <div className="Board">
         <div className="container-fluid">
           <div className="row">
-            <div className="col-md-4">
+            <div className="col-md-4" id="left">
               {this.renderSwimlane('Backlog', this.state.clients.backlog, this.swimlanes.backlog)}
             </div>
             <div className="col-md-4">
@@ -75,4 +77,14 @@ export default class Board extends React.Component {
       </div>
     );
   }
+
+  // Make each colum draggable 
+
+   componentDidMount() {
+    
+    Dragula([this.swimlanes.backlog.current,this.swimlanes.inProgress.current,this.swimlanes.complete.current ], { revertOnSpill: true }); 
+  }   
+  
+     
+   
 }
