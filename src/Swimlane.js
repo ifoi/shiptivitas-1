@@ -23,5 +23,5 @@ export default class Swimlane extends React.Component {
         </div>
       </div>);
   }
-
+  
 }
