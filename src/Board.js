@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useCallback} from 'react';
 import Dragula from 'dragula';
 import 'dragula/dist/dragula.css';
 import Swimlane from './Swimlane';
 import './Board.css';
+import produce from "immer" ;
 
 export default class Board extends React.Component {
   constructor(props) {
@@ -50,6 +51,7 @@ export default class Board extends React.Component {
       status: companyDetails[3],
     }));
   }
+  
   renderSwimlane(name, clients, ref) {
     return (
       <Swimlane name={name} clients={clients} dragulaRef={ref}/> 
@@ -66,10 +68,10 @@ export default class Board extends React.Component {
             <div className="col-md-4" id="left">
               {this.renderSwimlane('Backlog', this.state.clients.backlog, this.swimlanes.backlog)}
             </div>
-            <div className="col-md-4">
+            <div className="col-md-4" id="mid">
               {this.renderSwimlane('In Progress', this.state.clients.inProgress, this.swimlanes.inProgress)}
             </div>
-            <div className="col-md-4">
+            <div className="col-md-4" id ="right">
               {this.renderSwimlane('Complete', this.state.clients.complete, this.swimlanes.complete)}
             </div>
           </div>
@@ -80,11 +82,70 @@ export default class Board extends React.Component {
 
   // Make each colum draggable 
 
-   componentDidMount() {
+  componentDidMount() {
     
-    Dragula([this.swimlanes.backlog.current,this.swimlanes.inProgress.current,this.swimlanes.complete.current ], { revertOnSpill: true }); 
-  }   
-  
+    let drake = Dragula([this.swimlanes.backlog.current,this.swimlanes.inProgress.current,this.swimlanes.complete.current ], { revertOnSpill: true }); 
+    
+    drake.on("drop", function(el, target, source, sibling){
      
+    // if target is different from source changeLane and colour
+    if (target !== source) { 
+      // changeLane(el, target)
+       console.log("changed lane to:" + target.className )
+      
+       let targetId = target.parentElement.parentElement.id;
+       let sourceId = source.parentElement.parentElement.id;
+        
+       let newStatus = "backlog"
+       if(sourceId === "mid") newStatus = "inProgress" ;
+         else if(sourceId === "right") newStatus ="complete" ;
+
+       //if( target === this.swimlanes.inProgress.current )  targetId = "inProgress" ;
+    
+      console.log("target id: " + targetId )
+
+      console.log("element id: "+ el.dataset.id)
+       
+      el.dataset.status = newStatus
+
+      console.log("element status :" + el.dataset.status)
    
+     /*    this.setState( prevState=> ({  
+           ...prevState,
+           // backlog:{...prevState.backlog, prevState.backlog.filter(client.id === el.dataset.id) }
+           backlog: {...prevState.backlog, prevState.backlog{...prevState.backlog.client.id === el.dataset.id)  && client.status="inProgress"  } }
+      */   
+      
+         
+       this.changeStatus(el, target, newStatus) ;      
+        
+         }   //end of If target
+      } 
+   }  
+   
+
+    /*  changeStatus (el, target) {
+    console.log("entered ChangeStatus")
+     
+      this.setState( prevClients => ({  
+           prevClients.map(client)
+
+       })) 
+         } */
+
+  changeStatus = (el, target, newStatus ) => {
+          console.log("entered ChangeStatus" )
+  
+          this.setState(    
+            produce( draft => {
+              
+     //         const client = draft.background.find((client) =>client.id ===el.dataset.id);
+     //         client.status = el.dataset.status ;
+             draft.clients.backlog.forEach( client => {
+                if (client.id === el.dataset.id) {
+                client.status = newStatus 
+                       }
+                 }) 
+              })  //end of produce
+          )}
 }
